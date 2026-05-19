@@ -63,11 +63,8 @@ createdb -U postgres storego_inventory
 # 2. Compilar
 mvn clean package -DskipTests
 
-# 3. Ejecutar con profile local
-mvn spring-boot:run -Dspring-boot.run.arguments="--spring.profiles.active=local"
-
-# O con JAR compilado
-java -jar target/inventory-service-1.0.0.jar --spring.profiles.active=local
+# 3. Ejecutar
+java -jar target/inventory-service-1.0.0.jar
 ```
 
 ### 4. Verificar Salud
@@ -297,32 +294,7 @@ mvn test
 
 ## 📝 Configuración
 
-### application.properties (Producción)
-
-```properties
-spring.application.name=inventory-service
-spring.jpa.hibernate.ddl-auto=validate
-spring.datasource.url=jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:storego_inventory}
-spring.datasource.username=${DB_USER:postgres}
-spring.datasource.password=${DB_PASSWORD:postgres}
-server.port=8082
-jwt.secret=${JWT_SECRET:...}
-jwt.expiration=3600000
-```
-
-### application-local.properties (Desarrollo)
-
-```properties
-spring.jpa.show-sql=true
-logging.level.com.storego.inventoryservice=DEBUG
-jwt.secret=local-development-secret-key
-```
-
-**Activar perfil local:**
-
-```bash
-java -jar target/inventory-service-1.0.0.jar --spring.profiles.active=local
-```
+### application.properties (Producción y Desarrollo)
 
 ## 🐳 Docker
 
@@ -364,7 +336,6 @@ src/main/java/com/storego/inventoryservice/
 
 src/main/resources/
 ├── application.properties
-├── application-local.properties
 └── db/migration/    → Flyway migrations
 
 src/test/java/com/storego/inventoryservice/

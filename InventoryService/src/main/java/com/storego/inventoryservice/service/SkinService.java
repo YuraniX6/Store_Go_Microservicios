@@ -6,7 +6,6 @@ import com.storego.inventoryservice.dto.UpdateSkinRequest;
 import com.storego.inventoryservice.entity.Skin;
 import com.storego.inventoryservice.exception.SkinAccessDeniedException;
 import com.storego.inventoryservice.exception.SkinNotFoundException;
-import com.storego.inventoryservice.mapper.SkinMapper;
 import com.storego.inventoryservice.repository.SkinRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -24,25 +23,39 @@ import java.util.stream.Collectors;
 public class SkinService {
 
     private final SkinRepository skinRepository;
-    private final SkinMapper skinMapper;
+
+    private SkinResponse mapToResponse(Skin skin) {
+        return SkinResponse.builder()
+                .id(skin.getId())
+                .ownerId(skin.getOwnerId())
+                .name(skin.getName())
+                .weapon(skin.getWeapon())
+                .rarity(skin.getRarity())
+                .wear(skin.getWear())
+                .floatValue(skin.getFloatValue())
+                .imageUrl(skin.getImageUrl())
+                .createdAt(skin.getCreatedAt())
+                .updatedAt(skin.getUpdatedAt())
+                .build();
+    }
 
     public SkinResponse create(UUID ownerId, CreateSkinRequest request) {
         log.info("Creating new skin for owner: {}", ownerId);
 
         Skin skin = Skin.builder()
-            .ownerId(ownerId)
-            .name(request.getName())
-            .weapon(request.getWeapon())
-            .rarity(request.getRarity())
-            .wear(request.getWear())
-            .floatValue(request.getFloatValue())
-            .imageUrl(request.getImageUrl())
-            .build();
+                .ownerId(ownerId)
+                .name(request.getName())
+                .weapon(request.getWeapon())
+                .rarity(request.getRarity())
+                .wear(request.getWear())
+                .floatValue(request.getFloatValue())
+                .imageUrl(request.getImageUrl())
+                .build();
 
         Skin savedSkin = skinRepository.save(skin);
         log.info("Skin created with id: {} for owner: {}", savedSkin.getId(), ownerId);
 
-        return skinMapper.skinToSkinResponse(savedSkin);
+        return mapToResponse(savedSkin);
     }
 
     @Transactional(readOnly = true)
@@ -53,8 +66,8 @@ public class SkinService {
         log.info("Found {} skins for owner: {}", skins.size(), ownerId);
 
         return skins.stream()
-            .map(skinMapper::skinToSkinResponse)
-            .collect(Collectors.toList());
+                .map(this::mapToResponse)
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
@@ -62,23 +75,23 @@ public class SkinService {
         log.info("Fetching skin: {} for owner: {}", skinId, ownerId);
 
         Skin skin = skinRepository.findById(skinId)
-            .orElseThrow(() -> {
-                log.warn("Skin not found: {}", skinId);
-                return new SkinNotFoundException("Skin not found: " + skinId);
-            });
+                .orElseThrow(() -> {
+                    log.warn("Skin not found: {}", skinId);
+                    return new SkinNotFoundException("Skin not found: " + skinId);
+                });
 
         assertOwnership(skin, ownerId);
-        return skinMapper.skinToSkinResponse(skin);
+        return mapToResponse(skin);
     }
 
     public SkinResponse update(UUID ownerId, UUID skinId, UpdateSkinRequest request) {
         log.info("Updating skin: {} for owner: {}", skinId, ownerId);
 
         Skin skin = skinRepository.findById(skinId)
-            .orElseThrow(() -> {
-                log.warn("Skin not found: {}", skinId);
-                return new SkinNotFoundException("Skin not found: " + skinId);
-            });
+                .orElseThrow(() -> {
+                    log.warn("Skin not found: {}", skinId);
+                    return new SkinNotFoundException("Skin not found: " + skinId);
+                });
 
         assertOwnership(skin, ownerId);
 
@@ -92,17 +105,17 @@ public class SkinService {
         Skin updatedSkin = skinRepository.save(skin);
         log.info("Skin updated: {} for owner: {}", skinId, ownerId);
 
-        return skinMapper.skinToSkinResponse(updatedSkin);
+        return mapToResponse(updatedSkin);
     }
 
     public void delete(UUID ownerId, UUID skinId) {
         log.info("Deleting skin: {} for owner: {}", skinId, ownerId);
 
         Skin skin = skinRepository.findById(skinId)
-            .orElseThrow(() -> {
-                log.warn("Skin not found: {}", skinId);
-                return new SkinNotFoundException("Skin not found: " + skinId);
-            });
+                .orElseThrow(() -> {
+                    log.warn("Skin not found: {}", skinId);
+                    return new SkinNotFoundException("Skin not found: " + skinId);
+                });
 
         assertOwnership(skin, ownerId);
         skinRepository.deleteById(skinId);
@@ -111,7 +124,8 @@ public class SkinService {
 
     private void assertOwnership(Skin skin, UUID ownerId) {
         if (!skin.getOwnerId().equals(ownerId)) {
-            log.warn("Access denied: User {} attempted to access skin {} owned by {}", ownerId, skin.getId(), skin.getOwnerId());
+            log.warn("Access denied: User {} attempted to access skin {} owned by {}", ownerId, skin.getId(),
+                    skin.getOwnerId());
             throw new SkinAccessDeniedException("You do not have permission to access this skin");
         }
     }

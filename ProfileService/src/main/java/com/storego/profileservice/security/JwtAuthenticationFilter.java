@@ -45,7 +45,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             Claims claims = jwtService.parseToken(token);
             String sub = claims.getSubject();
-            String role = (String) claims.get("role");
 
             UUID userId;
             try {
@@ -57,8 +56,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             }
 
             List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-            if (role != null && !role.isEmpty()) {
-                authorities.add(new SimpleGrantedAuthority("ROLE_" + role));
+            Object rolesObj = claims.get("roles");
+            if (rolesObj instanceof List<?> roleList) {
+                for (Object r : roleList) {
+                    authorities.add(new SimpleGrantedAuthority("ROLE_" + r));
+                }
+            } else if (rolesObj != null) {
+                authorities.add(new SimpleGrantedAuthority("ROLE_" + rolesObj));
             }
 
             UsernamePasswordAuthenticationToken authentication =
@@ -69,7 +73,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     );
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
-            log.debug("Usuario {} autenticado con rol {}", userId, role);
+            log.debug("Usuario {} autenticado con authorities {}", userId, authorities);
 
         } catch (JwtException ex) {
             log.warn("JWT inválido o expirado: {}", ex.getMessage());

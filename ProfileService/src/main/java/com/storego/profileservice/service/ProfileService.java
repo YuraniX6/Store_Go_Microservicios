@@ -57,9 +57,11 @@ public class ProfileService {
             return saved;
         } catch (DataIntegrityViolationException ex) {
             log.error("Violación de integridad al crear perfil: {}", ex.getMessage());
-            throw new RutAlreadyTakenException(
-                    "RUT " + request.getRut() + " already exists"
-            );
+            String msg = ex.getMessage() != null ? ex.getMessage().toLowerCase() : "";
+            if (msg.contains("uk_profile_rut") || msg.contains("rut")) {
+                throw new RutAlreadyTakenException("RUT " + request.getRut() + " already exists");
+            }
+            throw new ProfileAlreadyExistsException("Profile already exists for user " + userId);
         }
     }
 

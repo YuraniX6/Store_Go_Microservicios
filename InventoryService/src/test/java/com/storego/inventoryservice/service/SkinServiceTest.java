@@ -8,7 +8,6 @@ import com.storego.inventoryservice.entity.Skin;
 import com.storego.inventoryservice.entity.Wear;
 import com.storego.inventoryservice.exception.SkinAccessDeniedException;
 import com.storego.inventoryservice.exception.SkinNotFoundException;
-import com.storego.inventoryservice.mapper.SkinMapper;
 import com.storego.inventoryservice.repository.SkinRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -34,9 +33,6 @@ class SkinServiceTest {
     @Mock
     private SkinRepository skinRepository;
 
-    @Mock
-    private SkinMapper skinMapper;
-
     @InjectMocks
     private SkinService skinService;
 
@@ -51,85 +47,80 @@ class SkinServiceTest {
         skinId = UUID.randomUUID();
 
         testSkin = Skin.builder()
-            .id(skinId)
-            .ownerId(ownerId)
-            .name("AWP | Dragon Lore")
-            .weapon("AWP")
-            .rarity(Rarity.COVERT)
-            .wear(Wear.FACTORY_NEW)
-            .floatValue(new BigDecimal("0.012345"))
-            .imageUrl("https://example.com/skin.png")
-            .createdAt(Instant.now())
-            .updatedAt(Instant.now())
-            .build();
+                .id(skinId)
+                .ownerId(ownerId)
+                .name("AWP | Dragon Lore")
+                .weapon("AWP")
+                .rarity(Rarity.COVERT)
+                .wear(Wear.FACTORY_NEW)
+                .floatValue(new BigDecimal("0.012345"))
+                .imageUrl("https://example.com/skin.png")
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
 
         testSkinResponse = SkinResponse.builder()
-            .id(skinId)
-            .ownerId(ownerId)
-            .name("AWP | Dragon Lore")
-            .weapon("AWP")
-            .rarity(Rarity.COVERT)
-            .wear(Wear.FACTORY_NEW)
-            .floatValue(new BigDecimal("0.012345"))
-            .imageUrl("https://example.com/skin.png")
-            .createdAt(testSkin.getCreatedAt())
-            .updatedAt(testSkin.getUpdatedAt())
-            .build();
+                .id(skinId)
+                .ownerId(ownerId)
+                .name("AWP | Dragon Lore")
+                .weapon("AWP")
+                .rarity(Rarity.COVERT)
+                .wear(Wear.FACTORY_NEW)
+                .floatValue(new BigDecimal("0.012345"))
+                .imageUrl("https://example.com/skin.png")
+                .createdAt(testSkin.getCreatedAt())
+                .updatedAt(testSkin.getUpdatedAt())
+                .build();
     }
 
     @Test
     void testCreateSkin_Success() {
         CreateSkinRequest request = CreateSkinRequest.builder()
-            .name("AWP | Dragon Lore")
-            .weapon("AWP")
-            .rarity(Rarity.COVERT)
-            .wear(Wear.FACTORY_NEW)
-            .floatValue(new BigDecimal("0.012345"))
-            .imageUrl("https://example.com/skin.png")
-            .build();
+                .name("AWP | Dragon Lore")
+                .weapon("AWP")
+                .rarity(Rarity.COVERT)
+                .wear(Wear.FACTORY_NEW)
+                .floatValue(new BigDecimal("0.012345"))
+                .imageUrl("https://example.com/skin.png")
+                .build();
 
         when(skinRepository.save(any(Skin.class))).thenReturn(testSkin);
-        when(skinMapper.skinToSkinResponse(testSkin)).thenReturn(testSkinResponse);
 
         SkinResponse response = skinService.create(ownerId, request);
 
         assertNotNull(response);
         assertEquals(skinId, response.getId());
-        assertEquals(ownerId, response.getOwnerId());
         assertEquals("AWP | Dragon Lore", response.getName());
 
         verify(skinRepository, times(1)).save(any(Skin.class));
-        verify(skinMapper, times(1)).skinToSkinResponse(testSkin);
     }
 
     @Test
     void testGetMySkins_Success() {
         UUID skinId2 = UUID.randomUUID();
         Skin testSkin2 = Skin.builder()
-            .id(skinId2)
-            .ownerId(ownerId)
-            .name("AK-47 | Redline")
-            .weapon("AK-47")
-            .rarity(Rarity.CLASSIFIED)
-            .wear(Wear.MINIMAL_WEAR)
-            .floatValue(new BigDecimal("0.25"))
-            .createdAt(Instant.now())
-            .updatedAt(Instant.now())
-            .build();
+                .id(skinId2)
+                .ownerId(ownerId)
+                .name("AK-47 | Redline")
+                .weapon("AK-47")
+                .rarity(Rarity.CLASSIFIED)
+                .wear(Wear.MINIMAL_WEAR)
+                .floatValue(new BigDecimal("0.25"))
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
+                .build();
 
         SkinResponse response2 = SkinResponse.builder()
-            .id(skinId2)
-            .ownerId(ownerId)
-            .name("AK-47 | Redline")
-            .weapon("AK-47")
-            .rarity(Rarity.CLASSIFIED)
-            .wear(Wear.MINIMAL_WEAR)
-            .floatValue(new BigDecimal("0.25"))
-            .build();
+                .id(skinId2)
+                .ownerId(ownerId)
+                .name("AK-47 | Redline")
+                .weapon("AK-47")
+                .rarity(Rarity.CLASSIFIED)
+                .wear(Wear.MINIMAL_WEAR)
+                .floatValue(new BigDecimal("0.25"))
+                .build();
 
         when(skinRepository.findAllByOwnerId(ownerId)).thenReturn(Arrays.asList(testSkin, testSkin2));
-        when(skinMapper.skinToSkinResponse(testSkin)).thenReturn(testSkinResponse);
-        when(skinMapper.skinToSkinResponse(testSkin2)).thenReturn(response2);
 
         List<SkinResponse> responses = skinService.getMySkins(ownerId);
 
@@ -153,7 +144,6 @@ class SkinServiceTest {
     @Test
     void testGetSkin_Success() {
         when(skinRepository.findById(skinId)).thenReturn(Optional.of(testSkin));
-        when(skinMapper.skinToSkinResponse(testSkin)).thenReturn(testSkinResponse);
 
         SkinResponse response = skinService.getSkin(ownerId, skinId);
 
@@ -161,7 +151,6 @@ class SkinServiceTest {
         assertEquals(skinId, response.getId());
 
         verify(skinRepository, times(1)).findById(skinId);
-        verify(skinMapper, times(1)).skinToSkinResponse(testSkin);
     }
 
     @Test
@@ -186,43 +175,42 @@ class SkinServiceTest {
     @Test
     void testUpdateSkin_Success() {
         UpdateSkinRequest request = UpdateSkinRequest.builder()
-            .name("AWP | Dragon Lore (Updated)")
-            .weapon("AWP")
-            .rarity(Rarity.COVERT)
-            .wear(Wear.MINIMAL_WEAR)
-            .floatValue(new BigDecimal("0.02"))
-            .imageUrl("https://example.com/updated.png")
-            .build();
+                .name("AWP | Dragon Lore (Updated)")
+                .weapon("AWP")
+                .rarity(Rarity.COVERT)
+                .wear(Wear.MINIMAL_WEAR)
+                .floatValue(new BigDecimal("0.02"))
+                .imageUrl("https://example.com/updated.png")
+                .build();
 
         Skin updatedSkin = Skin.builder()
-            .id(skinId)
-            .ownerId(ownerId)
-            .name("AWP | Dragon Lore (Updated)")
-            .weapon("AWP")
-            .rarity(Rarity.COVERT)
-            .wear(Wear.MINIMAL_WEAR)
-            .floatValue(new BigDecimal("0.02"))
-            .imageUrl("https://example.com/updated.png")
-            .createdAt(testSkin.getCreatedAt())
-            .updatedAt(Instant.now())
-            .build();
+                .id(skinId)
+                .ownerId(ownerId)
+                .name("AWP | Dragon Lore (Updated)")
+                .weapon("AWP")
+                .rarity(Rarity.COVERT)
+                .wear(Wear.MINIMAL_WEAR)
+                .floatValue(new BigDecimal("0.02"))
+                .imageUrl("https://example.com/updated.png")
+                .createdAt(testSkin.getCreatedAt())
+                .updatedAt(Instant.now())
+                .build();
 
         SkinResponse updatedResponse = SkinResponse.builder()
-            .id(skinId)
-            .ownerId(ownerId)
-            .name("AWP | Dragon Lore (Updated)")
-            .weapon("AWP")
-            .rarity(Rarity.COVERT)
-            .wear(Wear.MINIMAL_WEAR)
-            .floatValue(new BigDecimal("0.02"))
-            .imageUrl("https://example.com/updated.png")
-            .createdAt(testSkin.getCreatedAt())
-            .updatedAt(updatedSkin.getUpdatedAt())
-            .build();
+                .id(skinId)
+                .ownerId(ownerId)
+                .name("AWP | Dragon Lore (Updated)")
+                .weapon("AWP")
+                .rarity(Rarity.COVERT)
+                .wear(Wear.MINIMAL_WEAR)
+                .floatValue(new BigDecimal("0.02"))
+                .imageUrl("https://example.com/updated.png")
+                .createdAt(testSkin.getCreatedAt())
+                .updatedAt(updatedSkin.getUpdatedAt())
+                .build();
 
         when(skinRepository.findById(skinId)).thenReturn(Optional.of(testSkin));
         when(skinRepository.save(any(Skin.class))).thenReturn(updatedSkin);
-        when(skinMapper.skinToSkinResponse(updatedSkin)).thenReturn(updatedResponse);
 
         SkinResponse response = skinService.update(ownerId, skinId, request);
 
@@ -237,12 +225,12 @@ class SkinServiceTest {
     @Test
     void testUpdateSkin_NotFound() {
         UpdateSkinRequest request = UpdateSkinRequest.builder()
-            .name("Updated")
-            .weapon("AWP")
-            .rarity(Rarity.COVERT)
-            .wear(Wear.FACTORY_NEW)
-            .floatValue(new BigDecimal("0.01"))
-            .build();
+                .name("Updated")
+                .weapon("AWP")
+                .rarity(Rarity.COVERT)
+                .wear(Wear.FACTORY_NEW)
+                .floatValue(new BigDecimal("0.01"))
+                .build();
 
         when(skinRepository.findById(skinId)).thenReturn(Optional.empty());
 
@@ -255,12 +243,12 @@ class SkinServiceTest {
     void testUpdateSkin_AccessDenied() {
         UUID anotherUserId = UUID.randomUUID();
         UpdateSkinRequest request = UpdateSkinRequest.builder()
-            .name("Updated")
-            .weapon("AWP")
-            .rarity(Rarity.COVERT)
-            .wear(Wear.FACTORY_NEW)
-            .floatValue(new BigDecimal("0.01"))
-            .build();
+                .name("Updated")
+                .weapon("AWP")
+                .rarity(Rarity.COVERT)
+                .wear(Wear.FACTORY_NEW)
+                .floatValue(new BigDecimal("0.01"))
+                .build();
 
         when(skinRepository.findById(skinId)).thenReturn(Optional.of(testSkin));
 

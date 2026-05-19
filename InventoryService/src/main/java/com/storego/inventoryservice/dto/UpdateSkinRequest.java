@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
+import org.hibernate.validator.constraints.URL;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

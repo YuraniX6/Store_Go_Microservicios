@@ -53,14 +53,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             log.debug("JWT validated successfully for user: {} ({})", userId, username);
 
             List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + role)
-            );
+                    new SimpleGrantedAuthority("ROLE_" + role));
 
             UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(
-                userId.toString(),
-                null,
-                authorities
-            );
+                    userId.toString(),
+                    null,
+                    authorities);
 
             SecurityContextHolder.getContext().setAuthentication(authentication);
             log.debug("SecurityContext set for user: {}", userId);
