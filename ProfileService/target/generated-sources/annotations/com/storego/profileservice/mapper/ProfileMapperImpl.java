@@ -8,8 +8,8 @@ import org.springframework.stereotype.Component;
 
 @Generated(
     value = "org.mapstruct.ap.MappingProcessor",
-    date = "2026-05-19T00:17:07-0400",
-    comments = "version: 1.5.5.Final, compiler: javac, environment: Java 21.0.9 (Eclipse Adoptium)"
+    date = "2026-05-19T11:18:46-0400",
+    comments = "version: 1.5.5.Final, compiler: Eclipse JDT (IDE) 3.46.0.v20260407-0427, environment: Java 21.0.10 (Eclipse Adoptium)"
 )
 @Component
 public class ProfileMapperImpl implements ProfileMapper {
@@ -22,13 +22,13 @@ public class ProfileMapperImpl implements ProfileMapper {
 
         ProfileResponse.ProfileResponseBuilder profileResponse = ProfileResponse.builder();
 
-        profileResponse.userId( profile.getUserId() );
-        profileResponse.fullname( profile.getFullname() );
-        profileResponse.rut( profile.getRut() );
-        profileResponse.language( profile.getLanguage() );
-        profileResponse.description( profile.getDescription() );
         profileResponse.createdAt( profile.getCreatedAt() );
+        profileResponse.description( profile.getDescription() );
+        profileResponse.fullname( profile.getFullname() );
+        profileResponse.language( profile.getLanguage() );
+        profileResponse.rut( profile.getRut() );
         profileResponse.updatedAt( profile.getUpdatedAt() );
+        profileResponse.userId( profile.getUserId() );
 
         return profileResponse.build();
     }
@@ -41,11 +41,11 @@ public class ProfileMapperImpl implements ProfileMapper {
 
         PublicProfileResponse.PublicProfileResponseBuilder publicProfileResponse = PublicProfileResponse.builder();
 
-        publicProfileResponse.userId( profile.getUserId() );
+        publicProfileResponse.createdAt( profile.getCreatedAt() );
+        publicProfileResponse.description( profile.getDescription() );
         publicProfileResponse.fullname( profile.getFullname() );
         publicProfileResponse.language( profile.getLanguage() );
-        publicProfileResponse.description( profile.getDescription() );
-        publicProfileResponse.createdAt( profile.getCreatedAt() );
+        publicProfileResponse.userId( profile.getUserId() );
 
         return publicProfileResponse.build();
     }
